@@ -1,0 +1,6 @@
+[submodule "deps/anjay"]
+	path = deps/anjay
+	url = https://github.com/AVSystem/Anjay.git
+[submodule "deps/mbedtls"]
+	path = deps/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git
