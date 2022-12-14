@@ -14,24 +14,24 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-add_executable(temperature_object
+add_executable(temperature_object_mpl3115a2
                main.c
                temperature_sensor.c
                mpl3115a2.c
                )
 
-target_link_libraries(temperature_object
+target_link_libraries(temperature_object_mpl3115a2
                       pico_stdlib
                       hardware_i2c
                       anjay-pico
                       FreeRTOS
                       )
 
-target_include_directories(temperature_object PRIVATE
+target_include_directories(temperature_object_mpl3115a2 PRIVATE
                            ${COMMON_DIR}/config
                            )
 
-target_compile_definitions(temperature_object PRIVATE
+target_compile_definitions(temperature_object_mpl3115a2 PRIVATE
                            WIFI_SSID=\"${WIFI_SSID}\"
                            WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
                            ENDPOINT_NAME=\"${ENDPOINT_NAME}\"
@@ -39,4 +39,4 @@ target_compile_definitions(temperature_object PRIVATE
                            PSK_KEY=\"${PSK_KEY}\"
                            )
 
-pico_add_extra_outputs(temperature_object)
+pico_add_extra_outputs(temperature_object_mpl3115a2)

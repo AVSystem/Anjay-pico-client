@@ -113,4 +113,5 @@ target_link_libraries(anjay-pico
 add_subdirectory(anjay_init)
 add_subdirectory(mandatory_objects)
 add_subdirectory(secure_communication)
-add_subdirectory(temperature_object)
+add_subdirectory(temperature_object_mpl3115a2)
+add_subdirectory(temperature_object_ds18b20)

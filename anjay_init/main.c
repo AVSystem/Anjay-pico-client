@@ -67,7 +67,8 @@ void anjay_task(__unused void *params) {
     }
 
     // Event loop placeholder
-    while (true);
+    while (true)
+        ;
 
     anjay_delete(g_anjay);
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #ifndef AVS_COMMONS_CONFIG_H
 #define AVS_COMMONS_CONFIG_H
 
