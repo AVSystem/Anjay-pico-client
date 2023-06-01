@@ -12,26 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 cmake_minimum_required(VERSION 3.13)
 
-add_executable(temperature_object_ds18b20
+add_executable(temperature_object_lm35
                main.c
                temperature_sensor.c
-               ds18b20.c
+               lm35.c
                )
 
-target_link_libraries(temperature_object_ds18b20
+target_link_libraries(temperature_object_lm35
                       pico_stdlib
+                      hardware_adc
                       hardware_i2c
                       anjay-pico
                       FreeRTOS
                       )
 
-target_include_directories(temperature_object_ds18b20 PRIVATE
+target_include_directories(temperature_object_lm35 PRIVATE
                            ${COMMON_DIR}/config
                            )
 
-target_compile_definitions(temperature_object_ds18b20 PRIVATE
+target_compile_definitions(temperature_object_lm35 PRIVATE
                            WIFI_SSID=\"${WIFI_SSID}\"
                            WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
                            ENDPOINT_NAME=\"${ENDPOINT_NAME}\"
@@ -39,7 +41,8 @@ target_compile_definitions(temperature_object_ds18b20 PRIVATE
                            PSK_KEY=\"${PSK_KEY}\"
                            )
 
-pico_enable_stdio_usb(temperature_object_ds18b20 1)
-pico_enable_stdio_uart(temperature_object_ds18b20 0)
 
-pico_add_extra_outputs(temperature_object_ds18b20)
+pico_enable_stdio_usb(temperature_object_lm35 1)
+pico_enable_stdio_uart(temperature_object_lm35 0)
+
+pico_add_extra_outputs(temperature_object_lm35)

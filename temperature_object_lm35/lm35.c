@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-#include <avsystem/commons/avs_time.h>
+#include <hardware/adc.h>
+#include <hardware/gpio.h>
+#include <pico/stdlib.h>
 
-#include "FreeRTOS.h"
+#include "lm35.h"
 
-#include "lwip/sys.h"
+#if (LM35_GPIO_PIN < 26) || (LM35_GPIO_PIN > 28)
+#    error "Invalid ADC GPIO pin selected for LM35 sensor"
+#endif
 
-avs_time_monotonic_t avs_time_monotonic_now(void) {
-    static uint64_t prev_ms = 0;
-    uint64_t ms = sys_now();
-    while (ms < prev_ms) {
-        ms += portMAX_DELAY + 1;
-    }
-    prev_ms = ms;
-
-    return avs_time_monotonic_from_scalar((int64_t) ms, AVS_TIME_MS);
+int lm35_init(void) {
+    adc_init();
+    adc_gpio_init(LM35_GPIO_PIN);
+    return 0;
 }
 
-avs_time_real_t avs_time_real_now(void) {
-    avs_time_real_t result = {
-        .since_real_epoch = avs_time_monotonic_now().since_monotonic_epoch
-    };
-    return result;
+int temperature_get_data(double *sensor_data) {
+    adc_select_input(LM35_ADC_CHANNEL);
+    uint adc_val = adc_read();
+    double milli_volts = (double) adc_val * (3300. / 4096.);
+    *sensor_data = milli_volts / 10.;
+    return 0;
 }

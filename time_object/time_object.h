@@ -14,26 +14,9 @@
  * limitations under the License.
  */
 
-#include <avsystem/commons/avs_time.h>
+#pragma once
 
-#include "FreeRTOS.h"
+#include <anjay/dm.h>
 
-#include "lwip/sys.h"
-
-avs_time_monotonic_t avs_time_monotonic_now(void) {
-    static uint64_t prev_ms = 0;
-    uint64_t ms = sys_now();
-    while (ms < prev_ms) {
-        ms += portMAX_DELAY + 1;
-    }
-    prev_ms = ms;
-
-    return avs_time_monotonic_from_scalar((int64_t) ms, AVS_TIME_MS);
-}
-
-avs_time_real_t avs_time_real_now(void) {
-    avs_time_real_t result = {
-        .since_real_epoch = avs_time_monotonic_now().since_monotonic_epoch
-    };
-    return result;
-}
+const anjay_dm_object_def_t **time_object_create(void);
+void time_object_release(const anjay_dm_object_def_t **def);

@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-#include <avsystem/commons/avs_time.h>
+#pragma once
 
-#include "FreeRTOS.h"
+#define ADC_PIN_TO_CHANNEL(Pin) ((Pin) - (26))
 
-#include "lwip/sys.h"
+/* Temperature sensor ADC channel and pin */
+#define LM35_GPIO_PIN 26
+#define LM35_ADC_CHANNEL ADC_PIN_TO_CHANNEL(LM35_GPIO_PIN)
 
-avs_time_monotonic_t avs_time_monotonic_now(void) {
-    static uint64_t prev_ms = 0;
-    uint64_t ms = sys_now();
-    while (ms < prev_ms) {
-        ms += portMAX_DELAY + 1;
-    }
-    prev_ms = ms;
-
-    return avs_time_monotonic_from_scalar((int64_t) ms, AVS_TIME_MS);
-}
-
-avs_time_real_t avs_time_real_now(void) {
-    avs_time_real_t result = {
-        .since_real_epoch = avs_time_monotonic_now().since_monotonic_epoch
-    };
-    return result;
-}
+int lm35_init(void);
+int temperature_get_data(double *sensor_data);

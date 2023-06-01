@@ -30,23 +30,19 @@
 #include <avsystem/commons/avs_prng.h>
 #include <avsystem/commons/avs_time.h>
 
-#include "temperature_sensor.h"
+#include "time_object.h"
 
 #ifndef RUN_FREERTOS_ON_CORE
 #    define RUN_FREERTOS_ON_CORE 0
 #endif
 
-#define ANJAY_TASK_PRIORITY (tskIDLE_PRIORITY + 2UL)
-#define TEMP_UPDATE_TASK_PRIORITY (tskIDLE_PRIORITY + 1UL)
+#define ANJAY_TASK_PRIORITY (tskIDLE_PRIORITY + 1UL)
 
 #define ANJAY_TASK_SIZE (4000U)
-#define TEMP_UPDATE_TASK_SIZE (1000U)
 
 static anjay_t *g_anjay;
 static StackType_t anjay_stack[ANJAY_TASK_SIZE];
 static StaticTask_t anjay_task_buffer;
-static StackType_t temp_update_stack[TEMP_UPDATE_TASK_SIZE];
-static StaticTask_t temp_update_task_buffer;
 
 static void init_wifi(void) {
     if (cyw43_arch_init()) {
@@ -105,7 +101,6 @@ static int setup_server_object() {
     return anjay_server_object_add_instance(g_anjay, &server_instance,
                                             &server_instance_id);
 }
-
 void main_loop(void) {
     while (true) {
         AVS_LIST(avs_net_socket_t *const) sockets = NULL;
@@ -143,14 +138,6 @@ void main_loop(void) {
     }
 }
 
-void temperature_sensor_update_task(__unused void *params) {
-    const TickType_t delay = 2000 / portTICK_PERIOD_MS;
-    while (true) {
-        temperature_sensor_update(g_anjay);
-        vTaskDelay(delay);
-    }
-}
-
 void anjay_task(__unused void *params) {
     init_wifi();
 
@@ -170,16 +157,14 @@ void anjay_task(__unused void *params) {
         avs_log(main, ERROR, "Failed to initialize basic objects");
         exit(1);
     }
-
-    temperature_sensor_install(g_anjay);
-
-    xTaskCreateStatic(temperature_sensor_update_task, "TemperatureUpdateTask",
-                      TEMP_UPDATE_TASK_SIZE, NULL, TEMP_UPDATE_TASK_PRIORITY,
-                      temp_update_stack, &temp_update_task_buffer);
+    const anjay_dm_object_def_t **time_object = time_object_create();
+    if (!time_object || anjay_register_object(g_anjay, time_object)) {
+        avs_log(main, WARNING, "Failed to initialize time object");
+    }
 
     main_loop();
+    time_object_release(time_object);
     anjay_delete(g_anjay);
-    temperature_sensor_release();
 }
 
 int main(void) {

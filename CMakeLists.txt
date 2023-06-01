@@ -1,4 +1,4 @@
-# Copyright 2022 AVSystem <avsystem@avsystem.com>
+# Copyright 2022-2023 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ file(GLOB_RECURSE AVS_COAP_SOURCES "deps/anjay/deps/avs_coap/src/*.c")
 file(GLOB_RECURSE AVS_OS_COMPAT_SOURCES ${COMMON_DIR}/compat/*.c)
 file(GLOB FREERTOS_SOURCES ${FREERTOS_KERNEL_PATH}/*.c)
 file(GLOB MBEDTLS_SOURCES "deps/mbedtls/library/*.c")
-        
-add_library(anjay-pico 
+
+add_library(anjay-pico
             ${ANJAY_SOURCES}
             ${AVS_COMMONS_SOURCES}
             ${AVS_COAP_SOURCES}
@@ -115,3 +115,5 @@ add_subdirectory(mandatory_objects)
 add_subdirectory(secure_communication)
 add_subdirectory(temperature_object_mpl3115a2)
 add_subdirectory(temperature_object_ds18b20)
+add_subdirectory(temperature_object_lm35)
+add_subdirectory(time_object)

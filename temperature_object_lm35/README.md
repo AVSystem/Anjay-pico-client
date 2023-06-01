@@ -5,12 +5,12 @@ Anjay has a [dedicated API](https://avsystem.github.io/Anjay-doc/AdvancedTopics/
 The following example extends the [Secure Communication](../secure_communication) project with a low-level sensor driver and a higher-level IPSO object driver. Additionally, another task was created in `main.c` that reads data periodically and allows getting not only the momentary value but also tracking and recording the maximum and minimum readings from the sensor.
 
 ## Wiring information
-| Raspberry Pi Pico W pin | DS18B20 pin |
+| Raspberry Pi Pico W pin | LM35 pin |
 |---|---|
-| 40 - VBUS | 1 - VCC |
+| 36 - 3V3 (OUT)| 1 - VCC |
 | 38 - GND | 2 - GND |
-| 34 - GPIO28 | 3 - data |
+| 31 - GPIO26 | 3 - data |
 
-GPIO28 is the default pin for the data line, but it can be configured in `ds18b20.h` file using ``ONEWIRE_PIN`` macro.
+GPIO26 is the default pin for the data line, but it can be configured in `lm35.h` file using ``LM35_GPIO_PIN`` macro.
 
-![Wiring diagram](Pico_DS18B20.png "Wiring Diagram for Raspberry Pi Pico W and DS18B20 thermometer.")
+![Wiring diagram](Pico_lm35.png "Wiring Diagram for Raspberry Pi Pico W and lm35 thermometer.")

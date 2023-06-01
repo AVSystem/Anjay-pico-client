@@ -1,4 +1,4 @@
-# Copyright 2022 AVSystem <avsystem@avsystem.com>
+# Copyright 2022-2023 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,5 +38,8 @@ target_compile_definitions(temperature_object_mpl3115a2 PRIVATE
                            PSK_IDENTITY=\"${PSK_IDENTITY}\"
                            PSK_KEY=\"${PSK_KEY}\"
                            )
+
+pico_enable_stdio_usb(temperature_object_mpl3115a2 1)
+pico_enable_stdio_uart(temperature_object_mpl3115a2 0)
 
 pico_add_extra_outputs(temperature_object_mpl3115a2)

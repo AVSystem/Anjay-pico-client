@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 AVSystem <avsystem@avsystem.com>
+ * Copyright 2022-2023 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,8 +178,8 @@ void anjay_task(__unused void *params) {
                       temp_update_stack, &temp_update_task_buffer);
 
     main_loop();
-
     anjay_delete(g_anjay);
+    temperature_sensor_release();
 }
 
 int main(void) {

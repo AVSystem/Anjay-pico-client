@@ -23,7 +23,9 @@
 #include <avsystem/commons/avs_defs.h>
 #include <avsystem/commons/avs_log.h>
 
-#include "ds18b20.h"
+#include <hardware/gpio.h>
+
+#include "lm35.h"
 #include "temperature_sensor.h"
 
 static int
@@ -32,20 +34,14 @@ temperature_sensor_get_value(anjay_iid_t iid, void *_ctx, double *value) {
     (void) _ctx;
     assert(value);
 
-    double read_value;
-    if (!temperature_read_data() && !temperature_get_data(&read_value)) {
-        *value = read_value;
-        return 0;
-    } else {
-        return -1;
-    }
+    return temperature_get_data(value);
 }
 
 void temperature_sensor_install(anjay_t *anjay) {
-    if (ds18b20_init()) {
+    if (lm35_init()) {
         avs_log(ipso_object,
                 WARNING,
-                "Driver for DS18B20 could not be initialized!");
+                "Driver for LM35 could not be initialized!");
         return;
     }
 
@@ -62,8 +58,8 @@ void temperature_sensor_install(anjay_t *anjay) {
                 0,
                 (anjay_ipso_basic_sensor_impl_t) {
                     .unit = "Cel",
-                    .min_range_value = NAN,
-                    .max_range_value = NAN,
+                    .min_range_value = 0,
+                    .max_range_value = 100,
                     .get_value = temperature_sensor_get_value
                 })) {
         avs_log(ipso_object,
@@ -77,5 +73,5 @@ void temperature_sensor_update(anjay_t *anjay) {
 }
 
 void temperature_sensor_release(void) {
-    ds18b20_release();
+    gpio_deinit(LM35_GPIO_PIN);
 }

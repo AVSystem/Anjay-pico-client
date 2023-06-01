@@ -1,4 +1,4 @@
-# Copyright 2022 AVSystem <avsystem@avsystem.com>
+# Copyright 2022-2023 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,5 +33,8 @@ target_compile_definitions(mandatory_objects PRIVATE
                            WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
                            ENDPOINT_NAME=\"${ENDPOINT_NAME}\"
                            )
+
+pico_enable_stdio_usb(mandatory_objects 1)
+pico_enable_stdio_uart(mandatory_objects 0)
 
 pico_add_extra_outputs(mandatory_objects)
