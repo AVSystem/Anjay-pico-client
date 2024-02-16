@@ -9,6 +9,7 @@ Example applications refer to [Anjay Basic Client Tutorial](https://avsystem.git
 Application|Description|Reference
 ---|---|---
 [Anjay Initialization](anjay_init)|A minimum build environment for example client|[doc link](https://avsystem.github.io/Anjay-doc/BasicClient/BC-Initialization.html)
+[Firmware Update](firmware_update)|Firmware Update object implementation. See [firmware update README](firmware_update/README.md) for more information|[doc link](https://avsystem.github.io/Anjay-doc/FirmwareUpdateTutorial.html)
 [Mandatory Objects](mandatory_objects)|Mandatory LwM2M Objects necessary for setting up a connection with a server and an implementation of custom Anjay event loop|[doc link](https://avsystem.github.io/Anjay-doc/BasicClient/BC-MandatoryObjects.html)
 [Secure Communication](secure_communication)|Secure communication using PSK mode<br>Note: randomness source does not meet requirements of security systems, see [comments in the code](secure_communication/main.c#L2)|[doc link](https://avsystem.github.io/Anjay-doc/BasicClient/BC-Security.html)
 [Temperature Object with DS18B20](temperature_object_ds18b20)|Example Temperature Sensor object implementation using DS18B20|[doc link](https://avsystem.github.io/Anjay-doc/AdvancedTopics/AT-IpsoObjects.html)

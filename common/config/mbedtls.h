@@ -3060,7 +3060,7 @@
  * fragment length, respectively.
  */
 #define MBEDTLS_SSL_MAX_CONTENT_LEN                                           \
-    1024 /**< Maxium fragment length in bytes, determines the size of each of \
+    4096 /**< Maxium fragment length in bytes, determines the size of each of \
             the two internal I/O buffers */
 
 /** \def MBEDTLS_SSL_IN_CONTENT_LEN

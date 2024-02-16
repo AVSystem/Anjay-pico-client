@@ -1,4 +1,4 @@
-# Copyright 2022-2023 AVSystem <avsystem@avsystem.com>
+# Copyright 2022-2024 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -111,6 +111,7 @@ target_link_libraries(anjay-pico
                       )
 
 add_subdirectory(anjay_init)
+add_subdirectory(firmware_update)
 add_subdirectory(mandatory_objects)
 add_subdirectory(secure_communication)
 add_subdirectory(temperature_object_mpl3115a2)

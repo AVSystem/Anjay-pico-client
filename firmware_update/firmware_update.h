@@ -16,7 +16,6 @@
 
 #pragma once
 
-int temperature_read_data(void);
-int temperature_get_data(double *sensor_data);
-int mpl3115a2_init(void);
-int mpl3115a2_release(void);
+#include <anjay/anjay.h>
+
+int fw_update_install(anjay_t *anjay);

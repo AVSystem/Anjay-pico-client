@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2022-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@
  *
  * Only meaningful if <c>ANJAY_WITH_LOGS</c> is enabled.
  */
-#define ANJAY_WITH_TRACE_LOGS
+/* #undef ANJAY_WITH_TRACE_LOGS */
 
 /**
  * Enable core support for Access Control mechanisms.
@@ -91,7 +91,7 @@
  * <c>ANJAY_WITH_MODULE_ACCESS_CONTROL</c>, or a custom application-provided one
  * may be used.
  */
-#define ANJAY_WITH_ACCESS_CONTROL
+/* #undef ANJAY_WITH_ACCESS_CONTROL */
 
 /**
  * Enable automatic attribute storage.
@@ -149,12 +149,28 @@
  * <c>anjay_get_num_incoming_retransmissions()</c> and
  * <c>anjay_get_num_outgoing_retransmissions()</c> APIs.
  */
-#define ANJAY_WITH_NET_STATS
+/* #undef ANJAY_WITH_NET_STATS */
+
+/**
+ * Enable support for communication timestamp
+ * (<c>anjay_get_server_last_registration_time()</c>
+ * <c>anjay_get_server_next_update_time()</c> and
+ * <c>anjay_get_server_last_communication_time()</c>) APIs.
+ */
+/* #undef ANJAY_WITH_COMMUNICATION_TIMESTAMP_API */
 
 /**
  * Enable support for the <c>anjay_resource_observation_status()</c> API.
  */
 #define ANJAY_WITH_OBSERVATION_STATUS
+
+/**
+ * Maximum number of servers observing a given Resource listed by
+ * <c>anjay_resource_observation_status()</c> function.
+ *
+ * Only meaningful if <c>ANJAY_WITH_OBSERVATION_STATUS</c> is enabled.
+ */
+#define ANJAY_MAX_OBSERVATION_SERVERS_REPORTED_NUMBER 0
 
 /**
  * Enable guarding of all accesses to <c>anjay_t</c> with a mutex.
@@ -238,8 +254,9 @@
  * (<c>anjay_new_from_core_persistence()</c> and
  * <c>anjay_delete_with_core_persistence()</c> APIs).
  *
- * Requires <c>ANJAY_WITH_OBSERVE</c> to be enabled, and
- * <c>AVS_COMMONS_WITH_AVS_PERSISTENCE</c> to be enabled in avs_commons
+ * Requires <c>ANJAY_WITH_OBSERVE</c> to be enabled,
+ * <c>AVS_COMMONS_WITH_AVS_PERSISTENCE</c> to be enabled in avs_commons, and
+ * <c>WITH_AVS_COAP_OBSERVE_PERSISTENCE</c> to be enabled in avs_coap
  * configuration.
  *
  * IMPORTANT: Only available as a commercial feature. Ignored in the open
@@ -248,7 +265,13 @@
 /* #undef ANJAY_WITH_CORE_PERSISTENCE */
 
 /**
- * Enable support for CoAP Content-Format numerical values 1541-1543 that have
+ * Disable automatic closing of server connection sockets after
+ * MAX_TRANSMIT_WAIT of inactivity.
+ */
+/* #undef ANJAY_WITHOUT_QUEUE_MODE_AUTOCLOSE */
+
+/**
+ * Enable support for CoAP Content-Format numerical values 1541-1544 that have
  * been used before final LwM2M TS 1.0.
  */
 /* #undef ANJAY_WITH_LEGACY_CONTENT_FORMAT_SUPPORT */
@@ -259,7 +282,7 @@
  * NOTE: Anjay is only capable of generating this format, there is no parsing
  * support regardless of the state of this option.
  */
-#define ANJAY_WITH_LWM2M_JSON
+/* #undef ANJAY_WITH_LWM2M_JSON */
 
 /**
  * Disable support for TLV format as specified in LwM2M TS 1.0.
@@ -429,6 +452,26 @@
 #define ANJAY_DTLS_SESSION_BUFFER_SIZE 1024
 
 /**
+ * Value of Content-Format used in Send messages. Only a few specific values are
+ * supported:
+ *
+ * - @c AVS_COAP_FORMAT_NONE means no default value is used and Anjay will
+ *   decide the format based on the what is available.
+ * - @c AVS_COAP_FORMAT_OMA_LWM2M_CBOR Anjay will generate a Send message in
+ *   LwM2M CBOR format.
+ * - @c AVS_COAP_FORMAT_SENML_CBOR Anjay will generate a Send message in SenML
+ *   CBOR format.
+ * - @c AVS_COAP_FORMAT_SENML_JSON Anjay will generate a Send message in SenML
+ *   JSON format.
+ *
+ * Note that to use a specific format it must be available during compilation.
+ *
+ * The default value defined in CMake build scripts is
+ * <c>AVS_COAP_FORMAT_NONE</c>.
+ */
+#define ANJAY_DEFAULT_SEND_FORMAT AVS_COAP_FORMAT_NONE
+
+/**
  * Optional Anjay modules.
  */
 /**@{*/
@@ -437,7 +480,7 @@
  *
  * Requires <c>ANJAY_WITH_ACCESS_CONTROL</c> to be enabled.
  */
-#define ANJAY_WITH_MODULE_ACCESS_CONTROL
+/* #undef ANJAY_WITH_MODULE_ACCESS_CONTROL */
 
 /**
  * Enable security module (implementation of the LwM2M Security object).
@@ -472,10 +515,35 @@
 #define ANJAY_WITH_MODULE_FW_UPDATE
 
 /**
- * Enables ipso_objects module (generic implementation of the following kinds of
- * the basic sensor and three axis sensor IPSO objects).
+ * Enable advanced_fw_update module (implementation of the 33629 custom
+ * Advanced Firmware Update object).
+ */
+/* #undef ANJAY_WITH_MODULE_ADVANCED_FW_UPDATE */
+
+/**
+ * Disable support for PUSH mode Firmware Update.
+ *
+ * Only meaningful if <c>ANJAY_WITH_MODULE_FW_UPDATE</c> is enabled. Requires
+ * <c>ANJAY_WITH_DOWNLOADER</c> to be enabled.
+ */
+/* #undef ANJAY_WITHOUT_MODULE_FW_UPDATE_PUSH_MODE */
+
+/**
+ * Enable sw_mgmt module (implementation of the Software Management object).
+ */
+/* #undef ANJAY_WITH_MODULE_SW_MGMT */
+
+/**
+ * Enables ipso_objects module (generic implementation of basic sensor, three
+ * axis sensor and Push Button IPSO objects).
  */
 #define ANJAY_WITH_MODULE_IPSO_OBJECTS
+
+/**
+ * Enables experimental ipso_objects_v2 module (generic implementation of basic
+ * sensor and three axis sensor IPSO objects).
+ */
+#define ANJAY_WITH_MODULE_IPSO_OBJECTS_V2
 
 /**
  * Enable at_sms module (implementation of an SMS driver for AT modem devices).
@@ -508,10 +576,68 @@
  * <c>AVS_COMMONS_WITH_AVS_PERSISTENCE</c> to be enabled in avs_commons
  * configuration.
  *
- * IMPORTANT: Only available with the boostrapper feature. Ignored in the open
+ * IMPORTANT: Only available with the bootstrapper feature. Ignored in the open
  * source version.
  */
 /* #undef ANJAY_WITH_MODULE_BOOTSTRAPPER */
+
+/**
+ * Enable the SIM bootstrap module, which enables reading the SIM bootstrap
+ * information from a smartcard, which can then be passed through to the
+ * bootstrapper module.
+ *
+ * Requires <c>ANJAY_WITH_MODULE_BOOTSTRAPPER</c> to be enabled.
+ *
+ * IMPORTANT: Only available with the bootstrapper feature. Ignored in the open
+ * source version.
+ */
+/* #undef ANJAY_WITH_MODULE_SIM_BOOTSTRAP */
+
+/**
+ * Forced ID of the file to read the SIM bootstrap information from.
+ *
+ * If not defined (default), the bootstrap information file will be discovered
+ * through the ODF file, as mandated by the specification.
+ *
+ * Requires <c>ANJAY_WITH_MODULE_BOOTSTRAPPER</c> to be enabled. At most one of
+ * <c>ANJAY_MODULE_SIM_BOOTSTRAP_HARDCODED_FILE_ID</c> and
+ * <c>ANJAY_MODULE_SIM_BOOTSTRAP_DATA_OID_OVERRIDE_HEX</c> may be defined at the
+ * same time.
+ *
+ * IMPORTANT: Only available with the bootstrapper feature. Ignored in the open
+ * source version.
+ */
+/* #undef ANJAY_MODULE_SIM_BOOTSTRAP_HARDCODED_FILE_ID */
+
+/**
+ * Overridden OID of the SIM bootstrap information to look for in the DODF file,
+ * expressed as a hexlified DER representation (without the header).
+ *
+ * This is the hexlified expected value of the 'id' field within the 'OidDO'
+ * sequence in the DODF file (please refer to the PKCS #15 document for more
+ * information).
+ *
+ * If not defined, the default value of <c>"672b0901"</c>, which corresponds to
+ * OID 2.23.43.9.1 {joint-iso-itu-t(2) international-organizations(23) wap(43)
+ * oma-lwm2m(9) lwm2m-bootstrap(1)}, will be used.
+ *
+ * No other values than the default are valid according to the specification,
+ * but some SIM cards are known to use other non-standard values, e.g.
+ * <c>"0604672b0901"</c> - including a superfluous nested BER-TLV header, as
+ * erroneously illustrated in the EF(DODF-bootstrap) file coding example in
+ * LwM2M TS 1.2 and earlier (fixed in LwM2M TS 1.2.1) - which is interpreted as
+ * OID 0.6.4.103.43.9.1 (note that it is invalid as the 0.6 tree does not exist
+ * in the repository as of writing this note).
+ *
+ * Requires <c>ANJAY_WITH_MODULE_BOOTSTRAPPER</c> to be enabled. At most one of
+ * <c>ANJAY_MODULE_SIM_BOOTSTRAP_HARDCODED_FILE_ID</c> and
+ * <c>ANJAY_MODULE_SIM_BOOTSTRAP_DATA_OID_OVERRIDE_HEX</c> may be defined at the
+ * same time.
+ *
+ * IMPORTANT: Only available with the bootstrapper feature. Ignored in the open
+ * source version.
+ */
+/* #undef ANJAY_MODULE_SIM_BOOTSTRAP_DATA_OID_OVERRIDE_HEX */
 
 /**
  * Enable factory provisioning module. Data provided during provisioning uses
@@ -526,6 +652,17 @@
  * in the open source version.
  */
 /* #undef ANJAY_WITH_MODULE_OSCORE */
+
+/**
+ * If enable Anjay doesn't handle composite operation (read, observe and write).
+ * Its use makes sense for LWM2M v1.1 upwards.
+ *
+ * This flag can be used to reduce the size of the resulting code.
+ *
+ * If active, anjay will respond with message code 5.01 Not Implemented to any
+ * composite type request.
+ */
+/* #undef ANJAY_WITHOUT_COMPOSITE_OPERATIONS */
 /**@}*/
 
 #endif // ANJAY_CONFIG_H

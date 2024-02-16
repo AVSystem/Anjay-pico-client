@@ -30,23 +30,19 @@
 #include <avsystem/commons/avs_prng.h>
 #include <avsystem/commons/avs_time.h>
 
-#include "temperature_sensor.h"
+#include "firmware_update.h"
 
 #ifndef RUN_FREERTOS_ON_CORE
 #    define RUN_FREERTOS_ON_CORE 0
 #endif
 
-#define ANJAY_TASK_PRIORITY (tskIDLE_PRIORITY + 2UL)
-#define TEMP_UPDATE_TASK_PRIORITY (tskIDLE_PRIORITY + 1UL)
+#define ANJAY_TASK_PRIORITY (tskIDLE_PRIORITY + 1UL)
 
 #define ANJAY_TASK_SIZE (4000U)
-#define TEMP_UPDATE_TASK_SIZE (1000U)
 
 static anjay_t *g_anjay;
 static StackType_t anjay_stack[ANJAY_TASK_SIZE];
 static StaticTask_t anjay_task_buffer;
-static StackType_t temp_update_stack[TEMP_UPDATE_TASK_SIZE];
-static StaticTask_t temp_update_task_buffer;
 
 static void init_wifi(void) {
     if (cyw43_arch_init()) {
@@ -143,14 +139,6 @@ void main_loop(void) {
     }
 }
 
-void temperature_sensor_update_task(__unused void *params) {
-    const TickType_t delay = 2000 / portTICK_PERIOD_MS;
-    while (true) {
-        temperature_sensor_update(g_anjay);
-        vTaskDelay(delay);
-    }
-}
-
 void anjay_task(__unused void *params) {
     init_wifi();
 
@@ -171,15 +159,14 @@ void anjay_task(__unused void *params) {
         exit(1);
     }
 
-    temperature_sensor_install(g_anjay);
-
-    xTaskCreateStatic(temperature_sensor_update_task, "TemperatureUpdateTask",
-                      TEMP_UPDATE_TASK_SIZE, NULL, TEMP_UPDATE_TASK_PRIORITY,
-                      temp_update_stack, &temp_update_task_buffer);
+    if (fw_update_install(g_anjay)) {
+        avs_log(main, ERROR, "Failed to initialize FOTA object");
+        exit(1);
+    }
 
     main_loop();
+
     anjay_delete(g_anjay);
-    temperature_sensor_release();
 }
 
 int main(void) {

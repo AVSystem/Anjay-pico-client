@@ -1,5 +1,11 @@
 # Changelog
 
+## Anjay-pico 24.02 (Feb 16th, 2024)
+
+### Features
+ - Updated the anjay, avs_commons and avs_coap configuration files
+ - Added FOTA example
+
 ## Anjay-pico 23.06 (Jun 1st, 2023)
 
 ### Features

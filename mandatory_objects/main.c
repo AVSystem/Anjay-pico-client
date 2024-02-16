@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2022-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,13 +48,13 @@ static void init_wifi(void) {
     }
     cyw43_arch_enable_sta_mode();
     printf("Connecting to WiFi...\n");
-    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD,
-                                           CYW43_AUTH_WPA2_AES_PSK, 30000)) {
-        printf("failed to connect.\n");
-        exit(1);
-    } else {
-        printf("Connected.\n");
+    while (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD,
+                                              CYW43_AUTH_WPA2_AES_PSK, 30000)) {
+        const int sleep_time_ms = 1000;
+        printf("Failed to connect, trying again in %d ms\n", sleep_time_ms);
+        sleep_ms(sleep_time_ms);
     }
+    printf("Connected.\n");
 }
 
 static int setup_security_object() {

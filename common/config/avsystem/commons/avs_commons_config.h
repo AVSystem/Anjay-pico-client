@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2022-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,8 +191,8 @@
 #define AVS_COMMONS_WITH_AVS_LOG
 #define AVS_COMMONS_WITH_AVS_NET
 #define AVS_COMMONS_WITH_AVS_PERSISTENCE
-#define AVS_COMMONS_WITH_AVS_RBTREE
-/* #undef AVS_COMMONS_WITH_AVS_SORTED_SET */
+/* #undef AVS_COMMONS_WITH_AVS_RBTREE */
+#define AVS_COMMONS_WITH_AVS_SORTED_SET
 #define AVS_COMMONS_WITH_AVS_SCHED
 #define AVS_COMMONS_WITH_AVS_STREAM
 /* #undef AVS_COMMONS_WITH_AVS_UNIT */
@@ -438,6 +438,16 @@ void anjay_pico_mbedtls_entropy_init__(struct mbedtls_entropy_context *ctx);
 /* #undef AVS_COMMONS_WITH_MBEDTLS_PSA_ENGINE_PROTECTED_STORAGE */
 
 /**
+ * Enables use of the <c>psa_generate_random()</c> function as the default
+ * random number generator when using the Mbed TLS crypto backend, instead of
+ * CTR-DRBG seeded by the Mbed TLS entropy pool.
+ *
+ * It's meaningful only when @ref AVS_COMMONS_WITH_MBEDTLS is enabled. However,
+ * it is independent from the above PSA engine settings.
+ */
+/* #undef AVS_COMMONS_WITH_MBEDTLS_PSA_RNG */
+
+/**
  * Is the <c>dlsym()</c> function available?
  *
  * This is currently only used if @ref AVS_COMMONS_WITH_MBEDTLS_PKCS11_ENGINE is
@@ -558,6 +568,52 @@ void anjay_pico_mbedtls_entropy_init__(struct mbedtls_entropy_context *ctx);
  * Default logger implementation can be found in avs_log_impl.h
  */
 /* #undef AVS_COMMONS_WITH_EXTERNAL_LOGGER_HEADER */
+
+/**
+ * If specified, the process of checking if avs_log should be written out
+ * takes place in compile time.
+ *
+ * Specify an optional header with a list of modules for which log level
+ * is set. If a log level for specific module is not set, the DEFAULT level
+ * will be taken into account. Value of the default logging level is set to
+ * DEBUG, but can be overwritten in this header file with AVS_LOG_LEVEL_DEFAULT
+ * define. Messages with lower level than the one set will be removed during
+ * compile time. Possible values match @ref avs_log_level_t.
+ *
+ * That file should contain C preprocesor defines in the:
+ * - "#define AVS_LOG_LEVEL_FOR_MODULE_<Module> <Level>" format,
+ *   where <Module> is the module name and <Level> is allowed logging level
+ * - "#define AVS_LOG_LEVEL_DEFAULT <Level>" format, where <Level> is the
+ *   allowed logging level
+ *
+ * Example file content:
+ *
+ * <code>
+ * #ifndef AVS_COMMONS_EXTERNAL_LOG_LEVELS_H
+ * #define AVS_COMMONS_EXTERNAL_LOG_LEVELS_H
+ *
+ * // global log level value
+ * #define AVS_LOG_LEVEL_DEFAULT INFO
+ *
+ * //for "coap" messages only WARNING and ERROR messages will be present
+ * #define AVS_LOG_LEVEL_FOR_MODULE_coap WARNING
+ *
+ * //logs are disable for "net" module
+ * #define AVS_LOG_LEVEL_FOR_MODULE_net QUIET
+ *
+ * #endif
+ * </code>
+ */
+/* #undef AVS_COMMONS_WITH_EXTERNAL_LOG_LEVELS_HEADER */
+
+/**
+ * Disable log level check in runtime. Allows to save at least 1.3kB of memory.
+ *
+ * The macros avs_log_set_level and avs_log_set_default_level
+ * will not be available.
+ *
+ */
+/* #undef AVS_COMMONS_WITHOUT_LOG_CHECK_IN_RUNTIME */
 /**@}*/
 
 /**
@@ -676,6 +732,20 @@ void anjay_pico_mbedtls_entropy_init__(struct mbedtls_entropy_context *ctx);
 /* #undef AVS_COMMONS_NET_POSIX_AVS_SOCKET_HAVE_IN6_IS_ADDR_V4MAPPED */
 
 /**
+ * Should be defined if IPv4-mapped IPv6 addresses (<c>::ffff:0.0.0.0/32</c>)
+ * are <strong>NOT</strong> supported by the underlying platform.
+ *
+ * Enabling this flag will prevent avs_net from using IPv4-mapped IPv6 addresses
+ * and instead re-open and re-bind the socket if a connection to an IPv4 address
+ * is requested on a previously created IPv6 socket.
+ *
+ * This may result in otherwise redundant <c>socket()</c>, <c>bind()</c> and
+ * <c>close()</c> system calls to be performed, but may be necessary for
+ * interoperability with some platforms.
+ */
+/* #undef AVS_COMMONS_NET_POSIX_AVS_SOCKET_WITHOUT_IN6_V4MAPPED_SUPPORT */
+
+/**
  * Is the <c>inet_ntop()</c> function available?
  *
  * Disabling this flag will cause an internal implementation of this function
@@ -751,6 +821,44 @@ void anjay_pico_mbedtls_entropy_init__(struct mbedtls_entropy_context *ctx);
  * allocator.
  */
 #define AVS_COMMONS_UTILS_WITH_STANDARD_ALLOCATOR
+
+/**
+ * Enable the alternate implementation of avs_malloc(), avs_free(), avs_calloc()
+ * and avs_realloc() that uses system malloc(), free() and realloc() calls, but
+ * includes additional fixup code that ensures proper alignment to
+ * <c>AVS_ALIGNOF(avs_max_align_t)</c> (usually 8 bytes on common platforms).
+ *
+ * <c>AVS_COMMONS_UTILS_WITH_STANDARD_ALLOCATOR</c> and
+ * <c>AVS_COMMONS_UTILS_WITH_ALIGNFIX_ALLOCATOR</c> cannot be enabled at the
+ * same time.
+ *
+ * NOTE: This implementation is only intended for platforms where the system
+ * allocator does not properly conform to the alignment requirements.
+ *
+ * It comes with an additional runtime costs:
+ *
+ * - <c>AVS_ALIGNOF(avs_max_align_t)</c> bytes (usually 8) of additional
+ *   overhead for each allocated memory block
+ * - Additional memmove() for every realloc() that returned a block that is not
+ *   properly aligned
+ * - avs_calloc() is implemented as avs_malloc() followed by an explicit
+ *   memset(); this may be suboptimal on some platforms
+ *
+ * If these costs are unacceptable for you, you may want to consider fixing,
+ * replacing or reconfiguring your system allocator for conformance, or
+ * implementing a custom one instead.
+ *
+ * Please note that some code in avs_commons and dependent projects (e.g. Anjay)
+ * may include runtime assertions for proper memory alignment that will be
+ * triggered when using a non-conformant standard allocator. Such allocators are
+ * relatively common in embedded SDKs. This "alignfix" allocator is intended to
+ * work around these issues. On some platforms (e.g. x86) those alignment issues
+ * may not actually cause any problems - so you may want to consider disabling
+ * runtime assertions instead. Please carefully examine your target platform's
+ * alignment requirements and behavior of misaligned memory accesses (including
+ * 64-bit data types such as <c>int64_t</c> and <c>double</c>) before doing so.
+ */
+/* #undef AVS_COMMONS_UTILS_WITH_ALIGNFIX_ALLOCATOR */
 /**@}*/
 
 #endif /* AVS_COMMONS_CONFIG_H */
