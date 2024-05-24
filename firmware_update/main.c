@@ -30,6 +30,8 @@
 #include <avsystem/commons/avs_prng.h>
 #include <avsystem/commons/avs_time.h>
 
+#include <pico_fota_bootloader.h>
+
 #include "firmware_update.h"
 
 #ifndef RUN_FREERTOS_ON_CORE
@@ -141,6 +143,8 @@ void main_loop(void) {
 
 void anjay_task(__unused void *params) {
     init_wifi();
+
+    pfb_firmware_commit();
 
     anjay_configuration_t config = {
         .endpoint_name = ENDPOINT_NAME,

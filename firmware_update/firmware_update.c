@@ -26,18 +26,19 @@
 #include <avsystem/commons/avs_sched.h>
 #include <avsystem/commons/avs_time.h>
 
+#include <pico_fota_bootloader.h>
+
 #include "hardware/flash.h"
 #include "hardware/sync.h"
 #include "hardware/watchdog.h"
 
 #include "firmware_update.h"
 #include "flash_aligned_writer.h"
-#include "pico_fota_bootloader.h"
 
 static bool update_initialized;
 static size_t downloaded_bytes;
 
-static uint8_t writer_buf[256];
+static uint8_t writer_buf[PFB_ALIGN_SIZE];
 static flash_aligned_writer_t writer;
 
 static int fw_stream_open(void *user_ptr,
@@ -88,6 +89,11 @@ static int fw_stream_finish(void *user_ptr) {
         return -1;
     }
 
+    if (pfb_firmware_sha256_check(downloaded_bytes)) {
+        avs_log(fw_update, ERROR, "SHA256 check failed");
+        return -1;
+    }
+
     return 0;
 }
 
@@ -129,6 +135,9 @@ int fw_update_install(anjay_t *anjay) {
     if (pfb_is_after_firmware_update()) {
         state.result = ANJAY_FW_UPDATE_INITIAL_SUCCESS;
         avs_log(fw_update, INFO, "Running on a new firmware");
+    } else if (pfb_is_after_rollback()) {
+        state.result = ANJAY_FW_UPDATE_INITIAL_NEUTRAL;
+        avs_log(fw_update, WARNING, "Rollback performed");
     }
 
     return anjay_fw_update_install(anjay, &handlers, anjay, &state);

@@ -47,13 +47,19 @@ Download and install the following tools and programs:
  * [CMake](https://cmake.org/download/)
  * [Python](https://www.python.org/downloads/windows/)
 
+### Aditional dependencies
+
+[Firmware Update](firmware_update) application requires the following `python`
+packages for the SHA256 calculation and AES ECB image encryption: `argparse`,
+`pycryptodome`.
+
 ### Setting up the workspace
 
 In order to successfully build the client, you need Raspberry Pi Pico SDK and FreeRTOS kernel cloned into a base directory, parallel to this repository. Creating a workspace from scratch could look like this:
 ```
 mkdir pico
 cd pico
-git clone -b 1.4.0 https://github.com/raspberrypi/pico-sdk.git
+git clone -b 1.5.1 https://github.com/raspberrypi/pico-sdk.git
 cd pico-sdk/ 
 git submodule update --init 
 cd ..

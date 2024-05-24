@@ -41,8 +41,7 @@ target_compile_definitions(firmware_update PRIVATE
                            PSK_KEY=\"${PSK_KEY}\"
                            )
 
-target_link_options(firmware_update PRIVATE "-L${CMAKE_CURRENT_SOURCE_DIR}/pico_fota_bootloader/linker_common")
-pico_set_linker_script(firmware_update ${CMAKE_CURRENT_SOURCE_DIR}/pico_fota_bootloader/linker_common/application.ld)
+pfb_compile_with_bootloader(firmware_update)
 
 pico_enable_stdio_usb(firmware_update 1)
 pico_enable_stdio_uart(firmware_update 0)

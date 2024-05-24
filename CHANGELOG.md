@@ -1,5 +1,10 @@
 # Changelog
 
+## Anjay-pico 24.05 (May 24th, 2024)
+
+### Features
+- Updated FOTA example
+
 ## Anjay-pico 24.02 (Feb 16th, 2024)
 
 ### Features
